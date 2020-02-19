@@ -1,32 +1,42 @@
 <?php
 
-// On charge le fichier du modele
 require('model/frontend.php');
 
+
+
 function getIndexPage(){
-	$nb_posts = getPostsCount();
+	$postManager = new postManager();
+	$nb_posts = $postManager->getPostsCount();
+
 	$index = ($nb_posts) / 5;
 	return $index ;
 	require('view/frontend/listPostView.php');
 }
 
 function listPosts($offset){
-	$posts = getPosts($offset);
+
+	$postManager = new postManager();
+	$posts = $postManager->getPosts($offset);
+
 	require('view/frontend/listPostView.php');
 }
 
 function post(){
-	// On récupère le post et ses comments
-	$post = getPost($_GET['id']);
-	$comments = getComments($_GET['id']);
-	// On appelle la vue pour afficher les données
+
+	$postManager = new postManager();
+	$commentManager = new commentManager();
+
+	$post = $postManager->getPost($_GET['id']);
+	$comments = $commentManager->getComments($_GET['id']);
+
 	require('view/frontend/postView.php');
 }
 
 function addComment($postId, $author, $content){
 
-	//On test s'il y'a eu une erreur
-	$affectedLines = postComment($postId, $author, $content);
+	$commentManager = new commentManager();
+	$affectedLines->postComment($postId, $author, $content);
+
 	if ($affectedLines === false){
 		 // Erreur gérée. Elle sera remontée jusqu'au bloc try du routeur !
         throw new Exception('Impossible d\'ajouter le commentaire !');
@@ -42,8 +52,9 @@ function checkAndAddUser($name, $pwd, $pwd_verif, $mail){
 	$Errorname = $Errormail = $Errorpwd_verif = $Errormail_preg = '';
 	$Form_valide = 'true';
 	
-	// Vérif du name
-	$isNameExist = isNameExist($name);
+	$userManager = new userManager();
+	$isNameExist = $userManager->isNameExist($name);
+	
 	if(!empty($isNameExist)){
 		$Form_valide = false;
 		$Errorname = 'Ce pseudo n\'est pas dispo !<br>';
@@ -59,7 +70,9 @@ function checkAndAddUser($name, $pwd, $pwd_verif, $mail){
 		$Errormail = 'Ceci n\'est pas une adresse mail<br>';
 	}
 	else{
-		$isMailExist = isMailExist($mail); // affiche false si vide...
+
+		$userManager = new userManager();
+		$isMailExist = $userManager->isMailExist($mail); // affiche false si vide...
 		if(!empty($isMailExist)){
 			$Form_valide = false;
 			$Errormail_preg = 'Cette adresse mail n\'est pas dispo !<br>';
@@ -68,7 +81,8 @@ function checkAndAddUser($name, $pwd, $pwd_verif, $mail){
 
 	if ($Form_valide){
 		$pwd_hashed = password_hash($pwd, PASSWORD_DEFAULT);
-		insertNewUser($name, $pwd_hashed, $mail);
+		$userManager = new userManager();
+		$userManager->insertNewUser($name, $pwd_hashed, $mail);
 		echo'Vous êtes inscrit !<br>';
 		sessionConnect($name, $pwd);
 	}
@@ -80,7 +94,8 @@ function checkAndAddUser($name, $pwd, $pwd_verif, $mail){
 
 function sessionConnect($name, $pwd){
 	$name = htmlspecialchars($name);
-	$member_infos = getMemberInfos($name);
+	$userManager = new userManager();
+	$member_infos = $userManager->getMemberInfos($name);
 	if (!empty($member_infos)){
 		$is_password_correct = password_verify($pwd, $member_infos['pwd']);
 		if ($is_password_correct){
