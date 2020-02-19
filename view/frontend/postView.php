@@ -2,8 +2,7 @@
 <?php ob_start(); ?>
 
 <h1>Mon super blog</h1>
-<p><a href="index.php">Retour à la liste des posts</a></p>
-<p>Derniers posts</p>
+<p><a href="/oc_tp_blog_mvc/index.php">Retour à la liste des posts</a></p>
 
 <div class="news">
 	<h3>
@@ -19,12 +18,14 @@
 
 
 
+
 <h2>Commentaires :</h2>
 <?php
 while ($comment = $comments->fetch()){
 
 	echo '<p><strong>'.$comment['auteur'].': </strong>';
-	echo '<em>'.$comment['date_comments'].'</em><br>';
+	echo '<em>'.$comment['date_comments'].'</em>';
+	echo '<em> ( <a href="index.php?action=comment&amp;id_comment='.$comment['id_comment'].'">modifier</a> ) <em><br>';
 	echo ''.$comment['commentaire'].'</p>';
 }
 

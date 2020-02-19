@@ -1,46 +1,47 @@
 <?php
-
-// On charge le fichier du modele
 require ('controller/frontend.php');
 
-try { // On essaie de faire des choses
-
-	// On teste le paramètre action pour savoir quel contrôleur appeler.
+try { 
+	
 	if (isset ($_GET['action'])) {
 		if ($_GET['action'] == 'lastPosts'){
 			listPosts(0);
 		}
 		elseif ($_GET['action'] == 'post'){
 		
-			// On vérifie la valeur indiquée 
 			if (isset($_GET['id']) && $_GET['id'] > 0){
 				post();
 			}
 			else{
-				// Erreur ! On arrête tout, on envoie une exception, donc au saute directement au catch
                 throw new Exception('Aucun identifiant de billet envoyé');
+			}
+		}
+		elseif ($_GET['action'] == 'comment'){
+			if (isset($_GET['id_comment']) && $_GET['id_comment'] > 0){
+				comment();
+			}
+		}
+		elseif ($_GET['action'] == 'updateComment'){
+			if (!empty($_GET['id_comment']) && 
+				!empty($_GET['post'])){
+				
+				updateComment($_GET['post'],$_GET['id_comment'],$_POST['content']);
 			}
 		}
 		elseif ($_GET['action'] == 'addComment'){
 			if (isset($_GET['id']) && $_GET['id'] > 0){
 				if (!empty($_POST['author']) && !empty($_POST['content'])){
-					$postId = htmlspecialchars($_GET['id']);
-					$author = htmlspecialchars($_POST['author']);
-					$content = htmlspecialchars($_POST['content']);
-					addComment($postId, $author, $content);
+					addComment($_GET['id'], $_POST['author'], $_POST['content']);
 				}
 				else{
-					// Autre exception
                     throw new Exception('Tous les champs ne sont pas remplis !');
 				}
 			}
 			else{
-				// Autre exception
                 throw new Exception('Aucun identifiant de billet envoyé');
 			}
 		}
 		elseif ($_GET['action'] == 'addUser') {
-			// Verification du nom
 			$name = htmlspecialchars($_POST['name']);
 			$pwd = $_POST['pwd'];
 			$pwd_verif = $_POST['pwd_verif'];
@@ -63,7 +64,6 @@ try { // On essaie de faire des choses
 		}
 
 	}
-	// Si aucun controleur n'est appelé on charge la liste des posts
 	elseif (isset($_GET['page']) && $_GET['page'] >= 0){
 			
 			$page = htmlspecialchars($_GET['page']);
@@ -74,7 +74,7 @@ try { // On essaie de faire des choses
 		listPosts(0);
 	}
 }
-catch(Exception $e) { // S'il y a eu une erreur, alors...
+catch(Exception $e) { 
     echo 'Erreur : ' . $e->getMessage();
     
 }
